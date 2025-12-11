@@ -35,3 +35,6 @@ out/
 
 ### VS Code ###
 .vscode/
+
+# Docker Volume Data (MySQL, Redis 등)
+db_data/
