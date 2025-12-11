@@ -1,0 +1,31 @@
+spring:
+  application:
+    name: pixel-live
+
+  # 1. MySQL ?? ??
+  datasource:
+    url: jdbc:mysql://localhost:3307/pixellive?useSSL=false&allowPublicKeyRetrieval=true&characterEncoding=UTF-8&serverTimezone=Asia/Seoul
+    username: root
+    password: root
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  # 2. JPA ??
+  jpa:
+    hibernate:
+      ddl-auto: update # ?? ????? update (???? validate or none)
+    show-sql: true     # ???? ?? ??? ??
+    properties:
+      hibernate:
+        format_sql: true # ?? ??? ??
+        dialect: org.hibernate.dialect.MySQLDialect
+
+  # 3. Redis ?? ??
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+# ?? ?? ??
+logging:
+  level:
+    org.hibernate.SQL: debug
