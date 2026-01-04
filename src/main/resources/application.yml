@@ -2,30 +2,29 @@ spring:
   application:
     name: pixel-live
 
-  # 1. MySQL ?? ??
   datasource:
     url: jdbc:mysql://localhost:3307/pixellive?useSSL=false&allowPublicKeyRetrieval=true&characterEncoding=UTF-8&serverTimezone=Asia/Seoul
     username: root
     password: root
     driver-class-name: com.mysql.cj.jdbc.Driver
 
-  # 2. JPA ??
   jpa:
+    open-in-view: false # 트랜잭션 범위 밖에서 DB 커넥션 잡고 있는 것 방지
     hibernate:
-      ddl-auto: update # ?? ????? update (???? validate or none)
-    show-sql: true     # ???? ?? ??? ??
+      ddl-auto: update
+    show-sql: true
     properties:
       hibernate:
-        format_sql: true # ?? ??? ??
+        format_sql: true
         dialect: org.hibernate.dialect.MySQLDialect
+        default_batch_fetch_size: 100 # N+1 문제 발생 시 한방에 100개씩 가져오기
 
-  # 3. Redis ?? ??
   data:
     redis:
       host: localhost
       port: 6379
 
-# ?? ?? ??
 logging:
   level:
     org.hibernate.SQL: debug
+    org.hibernate.type.descriptor.sql: trace # 쿼리 파라미터(? 값) 보여주기

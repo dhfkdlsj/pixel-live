@@ -1,21 +1,21 @@
 version: '3.8'
 
 services:
-  # 1. MySQL 데이터베이스
   mysql:
-    image: mysql:latest
+    image: mysql:8.0
     container_name: pixel-mysql
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: pixellive
-      MYSQL_PASSWORD: root
+      TZ: Asia/Seoul
     ports:
       - "3307:3306"
-    command: # 한글 및 이모지 지원을 위한 UTF-8 설정
+    command:
       - --character-set-server=utf8mb4
       - --collation-server=utf8mb4_unicode_ci
+    volumes: # 데이터 영구 저장을 위해 추가
+      - ./db_data:/var/lib/mysql
 
-  # 2. Redis (쿨타임 및 캐싱용)
   redis:
     image: redis:alpine
     container_name: pixel-redis
