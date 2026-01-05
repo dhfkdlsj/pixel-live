@@ -12,7 +12,7 @@ spring:
     open-in-view: false # 트랜잭션 범위 밖에서 DB 커넥션 잡고 있는 것 방지
     hibernate:
       ddl-auto: update
-    show-sql: true
+    show-sql: false
     properties:
       hibernate:
         format_sql: true
