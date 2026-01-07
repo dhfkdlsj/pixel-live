@@ -38,3 +38,9 @@ out/
 
 # Docker Volume Data (MySQL, Redis 등)
 db_data/
+
+
+### React Frontend ###
+/frontend/node_modules
+/frontend/dist
+/frontend/.env
