@@ -5,6 +5,8 @@ import com.pixellive.pixellive.domain.canvas.entity.Canvas;
 import com.pixellive.pixellive.domain.canvas.repository.CanvasRepository;
 import com.pixellive.pixellive.domain.pixel.entity.Pixel;
 import com.pixellive.pixellive.domain.pixel.repository.PixelRepository;
+import com.pixellive.pixellive.global.error.CustomException;
+import com.pixellive.pixellive.global.error.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,7 +24,7 @@ public class CanvasService {
   public CanvasResponse getInitialCanvas() {
     // 1. 활성화된 캔버스 찾기
     Canvas canvas = canvasRepository.findFirstByIsActiveTrue()
-        .orElseThrow(() -> new IllegalArgumentException("현재 활성화된 캔버스가 존재하지 않습니다."));
+        .orElseThrow(() -> new CustomException(ErrorCode.CANVAS_NOT_FOUND));
 
     // 2. 해당 캔버스의 모든 픽셀 데이터 조회
     List<Pixel> pixels = pixelRepository.findAllByCanvasId(canvas.getId());
