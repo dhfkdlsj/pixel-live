@@ -32,9 +32,12 @@ public class PixelWebSocketHandler extends TextWebSocketHandler {
   @Override
   public void afterConnectionEstablished(WebSocketSession session) throws Exception {
     sessions.add(session);
-    log.info("🟢 사용자 입장! 세션 ID: {}, 현재 접속자: {}", session.getId(), sessions.size());
 
-    // 전체에게 "현재 인원수" 방송
+    // 🔥 저장해둔 IP 꺼내기
+    String clientIp = (String) session.getAttributes().get("CLIENT_IP");
+
+    log.info("🟢 사용자 입장! IP: {}, 세션 ID: {}, 접속자: {}", clientIp, session.getId(), sessions.size());
+
     broadcastUserCount();
   }
 
@@ -94,10 +97,17 @@ public class PixelWebSocketHandler extends TextWebSocketHandler {
   // 🔥 접속자 수 알림 메서드 (Protocol: type="USER_COUNT")
   private void broadcastUserCount() {
     try {
-      // 프론트가 구분할 수 있게 type 필드 추가
+      // 1. 현재 연결된 모든 세션에서 IP만 추출해서 Set에 담기 (자동 중복 제거)
+      long uniqueUserCount = sessions.stream()
+          .map(s -> (String) s.getAttributes().get("CLIENT_IP"))
+          .filter(ip -> ip != null) // 혹시 모를 null 방지
+          .distinct() // 중복 IP 제거 핵심!
+          .count();
+
+      // 2. 중복 제거된 숫자를 전송
       String countMessage = objectMapper.writeValueAsString(Map.of(
           "type", "USER_COUNT",
-          "count", sessions.size()
+          "count", uniqueUserCount
       ));
 
       // 위에서 만든 broadcast 재사용
