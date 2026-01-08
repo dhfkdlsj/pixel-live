@@ -1,42 +1,79 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+/* ... (위쪽 코드는 그대로 유지하거나 덮어쓰셔도 됩니다) ... */
+
+/* 0. 기본 리셋 및 폰트 적용 */
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+body {
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+  background-color: #e5e8eb; color: #333;
+  display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
+/* 1. 모바일 앱 프레임 */
+.app-container {
+  display: flex; flex-direction: column; width: 100%; max-width: 430px; height: 100vh; max-height: 900px;
+  background-color: #ffffff; box-shadow: 0 0 40px rgba(0,0,0,0.15); position: relative; overflow: hidden;
 }
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
+@media (min-width: 450px) { .app-container { height: 90vh; border-radius: 24px; } }
+
+/* 2. 헤더 */
+.app-header {
+  display: flex; justify-content: space-between; align-items: center; padding: 16px 20px;
+  background-color: #fff; border-bottom: 1px solid #f0f0f0; z-index: 10;
 }
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+.logo { font-size: 20px; font-weight: 800; color: #1a1a1a; }
+.status-indicator { font-size: 11px; font-weight: 700; padding: 4px 8px; border-radius: 12px; }
+.status-indicator.on { background-color: #e8f7ed; color: #00a368; }
+.status-indicator.off { background-color: #fff0f0; color: #ff4500; }
+
+/* 3. 캔버스 영역 */
+.canvas-container {
+  flex: 1; background-color: #f2f4f6; overflow: hidden; cursor: grab;
+  display: flex; align-items: center; justify-content: center;
+}
+.canvas-container:active { cursor: grabbing; }
+
+/* 🔥🔥 핵심 변경: 흰색 물감 구분을 위한 배경 처리 🔥🔥 */
+.pixel-canvas {
+  /* 1. 빈 캔버스 색상을 '연한 회색'으로 설정 (흰색 아님!) */
+  background-color: #E0E0E0;
+
+  /* 2. 그리드 선을 조금 더 진한 회색으로 */
+  background-size: 10px 10px;
+  background-image:
+    linear-gradient(to right, #d4d4d4 1px, transparent 1px),
+    linear-gradient(to bottom, #d4d4d4 1px, transparent 1px);
+
+  /* 3. 그림자 및 기타 설정 */
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  image-rendering: pixelated;
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+/* 4. 하단 컨트롤 영역 */
+.controls-container {
+  padding: 20px; background-color: #fff; border-top: 1px solid #eee;
+  display: flex; flex-direction: column; gap: 15px; z-index: 10;
 }
+.palette { display: grid; grid-template-columns: repeat(8, 1fr); gap: 8px; }
+.color-swatch {
+  width: 100%; aspect-ratio: 1/1; border-radius: 8px; cursor: pointer;
+  border: 1px solid #eee; /* 흰색 버튼 테두리 */
+}
+.color-swatch.selected {
+  transform: scale(1.1); box-shadow: 0 0 0 2px #fff, 0 0 0 4px #333; border: none;
+}
+.custom-color-picker {
+  display: flex; align-items: center; gap: 10px; font-size: 14px; color: #666; font-weight: 600;
+}
+input[type="color"] { width: 32px; height: 32px; border: none; background: none; cursor: pointer; }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
+/* 줌 컨트롤 */
+.zoom-controls {
+  position: absolute; top: 70px; right: 20px; display: flex; flex-direction: column; gap: 8px; z-index: 100;
 }
-
-.card {
-  padding: 2em;
+.zoom-controls button {
+  width: 40px; height: 40px; border: none; background-color: white; border-radius: 50%;
+  font-size: 18px; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  display: flex; justify-content: center; align-items: center; transition: all 0.2s ease;
 }
-
-.read-the-docs {
-  color: #888;
-}
+.zoom-controls button:hover { background-color: #f0f0f0; transform: scale(1.1); }
+.zoom-controls button:active { transform: scale(0.95); }
