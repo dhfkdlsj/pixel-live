@@ -32,4 +32,11 @@ public class PixelService {
     // 3. 저장된 데이터를 DTO로 변환해서 반환
     return PixelDto.from(savedPixel);
   }
+
+  @Transactional(readOnly = true)
+  public java.util.List<PixelDto> getAllPixels() {
+    return pixelRepository.findAll().stream()
+        .map(PixelDto::from)
+        .toList();
+  }
 }
