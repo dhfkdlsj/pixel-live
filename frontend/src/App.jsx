@@ -11,12 +11,11 @@ const COLOR_PALETTE = [
 function App() {
   const canvasRef = useRef(null);
   const socketRef = useRef(null);
-
-  // 🔥 드래그인지 클릭인지 판단하기 위한 좌표 저장소
   const mouseDownPos = useRef({ x: 0, y: 0 });
 
   const [isConnected, setIsConnected] = useState(false);
   const [myColor, setMyColor] = useState(COLOR_PALETTE[0]);
+  const [userCount, setUserCount] = useState(0); // 👈 접속자 수 상태 추가
 
   const PIXEL_SIZE = 10;
   const GRID_SIZE = 50;
@@ -42,37 +41,41 @@ function App() {
     socketRef.current = ws;
 
     ws.onopen = () => setIsConnected(true);
+
+    // 🔥 메시지 수신 로직 변경
     ws.onmessage = (event) => {
       const data = JSON.parse(event.data);
-      drawPixel(data.x, data.y, data.color);
+
+      if (data.type === "USER_COUNT") {
+        // 1. 인원수 업데이트 메시지인 경우
+        setUserCount(data.count);
+      } else {
+        // 2. 픽셀 찍기 메시지인 경우 (x, y 좌표가 있는지 확인)
+        if (data.x !== undefined && data.y !== undefined) {
+          drawPixel(data.x, data.y, data.color);
+        }
+      }
     };
+
     ws.onclose = () => setIsConnected(false);
 
     return () => { if (ws.readyState === 1) ws.close(); };
   }, []);
 
-  // 🖱️ 마우스 누름: 시작 위치 기억
   const handleMouseDown = (e) => {
     mouseDownPos.current = { x: e.clientX, y: e.clientY };
   };
 
-  // 🖱️ 마우스 뗌: 위치 비교 후 색칠 여부 결정
   const handleMouseUp = (e) => {
     if (!socketRef.current || socketRef.current.readyState !== WebSocket.OPEN) return;
 
-    // 1. 이동 거리 계산 (피타고라스까지 갈 필요도 없이 단순 차이 계산)
     const moveX = Math.abs(e.clientX - mouseDownPos.current.x);
     const moveY = Math.abs(e.clientY - mouseDownPos.current.y);
 
-    // 🔥 핵심: 5픽셀 이상 움직였으면 "드래그(이동)"로 간주하고 색칠 안 함!
-    if (moveX > 5 || moveY > 5) return;
+    if (moveX > 5 || moveY > 5) return; // 드래그면 무시
 
-    // --- 여기부터는 색칠 로직 ---
-    const canvas = canvasRef.current;
-    // zoom 라이브러리 내부 오프셋 사용
     const mouseX = e.nativeEvent.offsetX;
     const mouseY = e.nativeEvent.offsetY;
-
     const x = Math.floor(mouseX / PIXEL_SIZE);
     const y = Math.floor(mouseY / PIXEL_SIZE);
 
@@ -86,8 +89,14 @@ function App() {
     <div className="app-container">
       <header className="app-header">
         <h1 className="logo">Pixel Live</h1>
-        <div className={`status-indicator ${isConnected ? 'on' : 'off'}`}>
-          {isConnected ? 'LIVE' : 'OFFLINE'}
+        {/* 👇 헤더 오른쪽 영역 (접속자 수 + 상태 표시) */}
+        <div className="header-right">
+          <div className="user-count-badge">
+            👤 {userCount}
+          </div>
+          <div className={`status-indicator ${isConnected ? 'on' : 'off'}`}>
+            {isConnected ? 'LIVE' : 'OFFLINE'}
+          </div>
         </div>
       </header>
 
@@ -97,7 +106,7 @@ function App() {
         maxScale={4}
         centerOnInit={true}
         wheel={{ step: 0.1 }}
-        doubleClick={{ disabled: true }} // 더블클릭 확대 방지
+        doubleClick={{ disabled: true }}
       >
         {({ zoomIn, zoomOut, resetTransform }) => (
           <>
@@ -113,7 +122,6 @@ function App() {
                   ref={canvasRef}
                   width={CANVAS_SIZE}
                   height={CANVAS_SIZE}
-                  // 🔥 onClick 대신 MouseDown/Up 조합 사용
                   onMouseDown={handleMouseDown}
                   onMouseUp={handleMouseUp}
                   className="pixel-canvas"
